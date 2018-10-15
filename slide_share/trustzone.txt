@@ -1,0 +1,43 @@
+1. FFRI, Inc. Confidential Fourteenforty Research Institute, Inc. FFRI, Inc. http://www.ffri.jp ARMv8-M TrustZone: A New Security Feature for Embedded Systems
+2. FFRI, Inc. Confidential • Architecture for embedded devices (Cortex-M Processor family) which was announced in Nov 2015. • In order to comprehensively support for embedded systems that require the characteristics of the conventional ARMv6-M/ARMv7-M architecture, ARMv8-M has prepared 2 sub-profiles. – Baseline • For Ultra-low-power products • Similar to the ARMv6-M – Mainline • A full-featured, microcontroller products and high-performance embedded systems. • Similar to the ARMv7-M ARMv8-M Architecture 2 ARMv8-M Mainline ARMv8-M Baseline (Optional) Floating-Point (Optional) DSP
+3. FFRI, Inc. Confidential • Security features that ARM processor provides. – Cortex-A family or next-generation Cortex-M processors • It is possible to separate/isolate the security level by adding the security state. – e.g. Normal World & Secure World • ARMv8-M architecture has a different mechanism than TrustZone to provide traditional ARMv8-A architecture, which is optimized for embedded systems. TrustZone 3
+4. FFRI, Inc. Confidential • Add a monitor mode, it is separated into “Normal World” and “Secure World”. – To transition monitor mode, use SMC instruction. – A kind of virtualization feature using the OS monitor. • iPhone of Secure Enclave are known to have been using the TrustZone. • For more information, please refer to the our research paper, which was published in March 2013. (Japanese only) TrustZone (ARMv7, ARMv8-A, etc…) 4 ARMv8-Ａ Normal World Secure World Monitor User Mode Priv Mode User Mode Priv Mode
+5. FFRI, Inc. Confidential • Add a secure state, it is possible into Non-secure Handler/Thread mode and Secure Handler/Thread mode. – The state transition to use the branch instruction. – System rises by default in the “Secure” state. • Throughout the reminder of this article describes ARMv8-M TrustZone. TrustZone (ARMv8-M) 5 ARMv7-M Handler Mode Thread Mode ARMv8-M Non-secure Handler Mode Thread Mode Secure Handler Mode Thread Mode
+6. FFRI, Inc. Confidential • In addition to the definition by the developer of microcontrollers and SoC, it can also be defined the software by utilizing the SAU and IDAU interfaces. • Memory spaces can be divided into three. (See the figure on the right) • State of the processor is dependent on definition of the memory space. ARMv8-M TrustZone - Memory space separation 6 SAU: Software Attribution Unit IDAU: Implementation Defined Attribution Unit Secure Non-Secure Callable Non-Secure Code Data Stack Heap, etc… Code Data Stack Heap, etc… Entry to Secure Code Vector of secure gateway 0xffffffff 0x00000000
+7. FFRI, Inc. Confidential • To call processing of the Secure region from the Non-Secure region, it is necessary to relay a secure gateway. – The first instruction of the function to be called from Non-Secure region MUST always SG (Secure Gateway) instruction. – SG instruction MUST be present in the NSC (Non-Secure Callable) region. • In case of call processing of the Non-Secure region from the Secure region, push current state to stack and then branch to Non-Secure region. – When processing branch to the Non-Secure region, reserved value FNC_RETURN is set to Link Register. (LR) – When returning to Secure region branches to this Link Register. (FNC_RETURN) ARMv8-M TrustZone – Secure Gateway 7
+8. FFRI, Inc. Confidential • If Non-Secure region program accessed directly to address of the Secure region occurs following exception. – In Mainline SecureFault(7), in Baseline HardFault(3) is an exception occurs in Secure State. ARMv8-M TrustZone - Secure Gateway 8 /* Secure */ Func_A: ;Secure Routine bxns lr /* NSC */ Func_A_Entry: SG b Func_A /* Non-Secure */ bl Func_A_Entry … /* Secure */ Func_A: ;Secure Routine blxns r0 … /* NSC */ Func_A_Entry: SG b Func_A /* Non-Secure */ Func_B: ;Non-Secure Routine bx lr (3) (4) (5)(1) (2) Secure State Non-Secure State State transition of the processor (1) (2) (3), (4) (5) 0xffffffff 0x00000000 Exception
+9. FFRI, Inc. Confidential • Region number is assigned in the memory space defined by the aforementioned SAU and IDAU. – Possible to know whether it has the security attribute target is continuous by the region number. • New TestTarget (TT) instruction to return security attributes and region number from the address. – By using TT instruction, it is possible to know address range of the array or structure is belong to the same region. ARMv8-M TrustZone - Test Target 9 Secure Non-Secure Secure Non-Secure 0xffffffff 0x00000000 Secure Region #4 Non- Secure Region#3 Secure Region #2 Non- Secure Region #1 Start-End address range is same region. Start-End address is across the different regions. Start-End address range is same region.
+10. FFRI, Inc. Confidential • Even for embedded device architecture that supported the TrustZone, protection of data it is realistic also due to this technology for a variety of IoT and in-vehicle devices. • For example, IoT device vendors by storing in advance the firmware in the Secure region, it can be expected that the reverse engineering measures. ARMv8-M TrustZone - example usage for embedded systems 10 ECU ECU TrustZone enabled processor in embedded device ARMv8-M ARMv8-M Secure FW Libraries Key Non-Secure User Data Drivers, etc… IoT/M2M Devices
+11. FFRI, Inc. Confidential • In this paper, we introduce the TrustZone of information that has published at this time in relation to ARMv8-M. – There is a specification change possibility in the future because some document is still Beta. • In Febrary 2016, the processor and evaluation board of ARMv8-M architecture has not been confirmed in the market. – For even compiler, GCC and Clang is currently working. • For automotive, already HSM (Hardware Security Module) is present as a standard. – Therefore, semiconductor manufactures are mainly shipped microcontroller products that conform to this standard as automotive. – With the advent of the ARMv8-M, the future there is a possibility that products utilizing the TrustZone is announced. Summary 11
+12. FFRI, Inc. Confidential • Whitepaper – ARMv8-M Architecture Technical Overview – https://community.arm.com/docs/DOC-10896 • ARM® コンパイラ ソフトウェア開発ガイド バージョン6.3 – http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui 0773dj/pge1446115999905_00009.html • (動画) ARMv8-M architecture: what’s new for developers – https://youtu.be/V5zr5mPjAvU • FFRI Monthly Research – セキュアハードウェアの登場とその分析 – http://www.ffri.jp/assets/files/monthly_research/MR201303_Trust Zone.pdf References 12 ARM® and TrustZone® are trademarks of ARM Ltd.
+Recommended
+Flipping the Classroom
+Flipping the Classroom
+Online Course - LinkedIn Learning
+Learning to Run Webinars
+Learning to Run Webinars
+Online Course - LinkedIn Learning
+Learning Everyday Math
+Learning Everyday Math
+Online Course - LinkedIn Learning
+Hardware accelerated Virtualization in the RM Cortex™ Processors
+Hardware accelerated Virtualization in the RM Cortex™ Processors
+The Linux Foundation
+Sierraware ARM hypervisor 
+Sierraware ARM hypervisor
+Sierraware
+Unit vi (2)
+Unit vi (2)
+Siva Nageswararao
+Secure IOT Gateway
+Secure IOT Gateway
+LF Events
+BKK16-504 Running Linux in EL2 Virtualization
+BKK16-504 Running Linux in EL2 Virtualization
+Linaro
+RR Embedded Trainings - RR EmbedLabs ARM Processor Architecture
+RR Embedded Trainings - RR EmbedLabs ARM Processor Architecture
+RR Embedded
+HKG15-400: Next steps in KVM enablement on ARM
+HKG15-400: Next steps in KVM enablement on ARM
+Linaro
