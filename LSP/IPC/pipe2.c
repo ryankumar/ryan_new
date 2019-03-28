@@ -33,7 +33,7 @@ ryan@ryan-HP-241-G1:~/Desktop/LSP/IPC$
 int main()
 {
   int filefd[2];
-  char data[]="123";
+  char data[]="madhab";
   char buffer[10];
   int ret;
    pid_t pid;

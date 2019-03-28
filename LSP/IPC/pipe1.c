@@ -7,7 +7,7 @@ int main()
 {
   int filefd[2];
   char data[]="123";
-  char buffer[10];
+  char buffer[10]={0};
   int ret;
   ret=pipe(filefd);
   if(ret!=0)
