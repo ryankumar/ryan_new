@@ -7,66 +7,64 @@
 #include<string.h>
 #include<signal.h>
 char *msg="hiii";
-void ouch(int sig)
-{
-  sleep(1);
-}
+sigset_t set;
+int sig;
+pthread_t thread,thread1,thread2;
 
 void * fun(void * arg);
  void * fun1(void * arg);
  void * fun2(void * arg);
 int main()
 {
-  pthread_t thread,thread1,thread2;
+  sigemptyset(&set);
+  sigaddset(&set,SIGUSR1);
+  pthread_sigmask(SIG_BLOCK,&set,NULL);
+  
+//  pthread_t thread,thread1,thread2;
   void * t_result, * t_result1;
   pthread_create(&thread,NULL,fun,(void *)msg);
   pthread_create(&thread1,NULL,fun1,(void *)msg); // craetion of thread
   pthread_create(&thread2,NULL,fun2,(void *)msg);
-/*
-  pthread_join(thread,&t_result);  //waiting for thread exit;
-   pthread_join(thread1,&t_result1); 
-  printf("thread is joined with return value:%s\n",(char *) t_result);
-*/
 
- while(1)
-{
   pthread_kill(thread,SIGUSR1);
-    sleep(1) ;
-  pthread_kill(thread1,SIGUSR2);
-   sleep(1);
- pthread_kill(thread2,SIGINT);
-  sleep(1);
-}
+  sigwait(&set,&sig);
+  pthread_join(thread,&t_result);  //waiting for thread exit;
+  pthread_join(thread1,&t_result1); 
+  pthread_join(thread2,&t_result1);
+
+  printf("thread is joined with return value:%s\n",(char *) t_result);
+
 pthread_exit("EXITSTATUS");
 exit(0);
 }
  
 void * fun(void * arg)
  {
-   (void) signal(SIGUSR1,ouch);
-   
+
+   sigwait(&set,&sig);
   while(1){
    printf("one\n");
-    pause();
+   pthread_kill(thread1,SIGUSR1);
+   sigwait(&set,&sig);
     }
  }
 
   void * fun1(void * arg)
  {
-    (void) signal(SIGUSR2,ouch);
-     
+  sigwait(&set,&sig);   
   while(1){
    printf("two\n");
-   pause();
+   pthread_kill(thread2,SIGUSR1);
+   sigwait(&set,&sig);
   }
  }
 void * fun2(void * arg)
  {
- (void) signal(SIGINT,ouch);
-   
+  sigwait(&set,&sig); 
   while(1){
    printf("three\n");
-   pause();
+   pthread_kill(thread,SIGUSR1);
+   sigwait(&set,&sig);
   }
  }
 
