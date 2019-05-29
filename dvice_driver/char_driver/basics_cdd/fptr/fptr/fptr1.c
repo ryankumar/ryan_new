@@ -14,11 +14,11 @@ void (*fptr) (int); // function pointer declaration
 int main ()
 {
 
-fptr = &my_fun1; //Function pointer Initalization
+fptr = my_fun1; //Function pointer Initalization
 
 (*fptr)(4); // function pointer invoke
 
-fptr = &my_fun2; //Function pointer Initalization
+fptr = my_fun2; //Function pointer Initalization
 (*fptr)(4); // function pointer invoke
 
 
